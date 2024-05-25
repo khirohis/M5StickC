@@ -22,7 +22,7 @@ void loop() {
   M5.update();
 
   if (M5.BtnA.isPressed()) {
-    lcdPrintln("1234567890123");
+    lcdPrintln("BtnA");
     digitalWrite(M5_LED, LOW);
     delay(200);
   } else {
@@ -30,7 +30,7 @@ void loop() {
   }
 
   if (M5.BtnB.isPressed()) {
-    lcdPrintln("12345678901234");
+    lcdPrintln("BtnB");
     digitalWrite(M5_LED, LOW);
     delay(100);
     digitalWrite(M5_LED, HIGH);
