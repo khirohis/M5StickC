@@ -9,7 +9,7 @@ void setup() {
     // シリアルの初期化
     Serial.begin(115200);
 
-    disp.init(1);
+    disp.init(1, 2);
 }
 
 void loop() {

@@ -8,18 +8,24 @@ ScrDisplay::ScrDisplay()
 {
 }
 
-int ScrDisplay::init(int mode)
+int ScrDisplay::init(int mode, int textSize)
 {
     metrics.mode = mode;
+    metrics.textSize = textSize;
+    metrics.fontWidth = sFontWidth * textSize;
+    metrics.fontHeight = sFontHeight * textSize;
+
     M5.Lcd.setRotation(mode);
     M5.Lcd.setTextFont(1);
-    M5.Lcd.setTextSize(1);
+    M5.Lcd.setTextSize(textSize);
 
-    metrics.width = M5.Lcd.width();
-    metrics.height = M5.Lcd.height();
+    metrics.pixelWidth = M5.Lcd.width();
+    metrics.pixelHeight = M5.Lcd.height();
 
-    int column = metrics.width / sFontWidth;
-    int row = metrics.height / sFontHeight;
+    int column = metrics.pixelWidth / metrics.fontWidth;
+    metrics.offsetX = (metrics.pixelWidth % metrics.fontWidth) / 2;
+    int row = metrics.pixelHeight / metrics.fontHeight;
+    metrics.offsetY = (metrics.pixelHeight % metrics.fontHeight) / 2;
     setupBuffer(column, row);
 
     clear();
@@ -34,32 +40,11 @@ void ScrDisplay::clear()
     setCursor(0, 0);
 }
 
-void ScrDisplay::refresh()
-{
-    for (int row = 0; row < buffer.row; row++) {
-        // TODO:
-        M5.Lcd.setCursor(0, sFontHeight * row);
-        M5.Lcd.print(buffer.buffer[row]);
-    }
-}
-
 void ScrDisplay::setCursor(int x, int y)
 {
     cursor.x = x;
     cursor.y = y;
 }
-
-void ScrDisplay::lineFeed()
-{
-    cursor.x = 0;
-    if (++cursor.y >= buffer.row) {
-        scrollBuffer();
-        refresh();
-
-        cursor.y--;
-    }
-}
-
 
 int ScrDisplay::putChar(char ch)
 {
@@ -72,11 +57,22 @@ int ScrDisplay::putChar(char ch)
     buffer.buffer[cursor.y][cursor.x] = ch;
     drawChar(cursor.x, cursor.y, ch);
 
-    if (cursor.x++ >= buffer.column) {
+    if (++cursor.x >= buffer.column) {
         lineFeed();
     }
 
     return 1;
+}
+
+void ScrDisplay::lineFeed()
+{
+    cursor.x = 0;
+    if (++cursor.y >= buffer.row) {
+        scrollBuffer();
+        flushBuffer();
+
+        cursor.y--;
+    }
 }
 
 
@@ -125,8 +121,20 @@ void ScrDisplay::scrollBuffer()
     *chars = '\0';
 }
 
+void ScrDisplay::flushBuffer()
+{
+    for (int row = 0; row < buffer.row; row++) {
+        // TODO:
+        M5.Lcd.setCursor(metrics.offsetX,
+            metrics.offsetY + metrics.fontHeight * row);
+        M5.Lcd.print(buffer.buffer[row]);
+    }
+}
+
+
 void ScrDisplay::drawChar(int x, int y, char ch)
 {
-    M5.Lcd.setCursor(sFontWidth * x, sFontHeight * y);
+    M5.Lcd.setCursor(metrics.offsetX + metrics.fontWidth * x,
+        metrics.offsetY + metrics.fontHeight * y);
     M5.Lcd.print(ch);
 }
