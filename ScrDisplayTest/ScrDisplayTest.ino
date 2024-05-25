@@ -9,9 +9,7 @@ void setup() {
     // シリアルの初期化
     Serial.begin(115200);
 
-    disp.init();
-    disp.setMode(1);
-    disp.setCursor(1, 1);
+    disp.init(1);
 }
 
 void loop() {

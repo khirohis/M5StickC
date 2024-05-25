@@ -8,32 +8,41 @@ class ScrDisplay
 {
 
 private:
-    uint8_t mode = 0;
+    struct DisplayMetrics {
+        int mode = 0;
+        int width = 0;
+        int height = 0;
+    } metrics;
 
-    int width = 0;
-    int height = 0;
-    int numColumn = 0;
-    int numRow = 0;
+    struct DisplayBuffer {
+        int column = 0;
+        int row = 0;
+        char **buffer = NULL;
+        int startOffset = 0;
+    } buffer;
 
-    int cursorX = 0;
-    int cursorY = 0;
+    struct Cursor {
+        int x = 0;
+        int y = 0;
+    } cursor;
 
 public:
     ScrDisplay();
 
-    int init();
-
-    uint8_t getMode();
-    int setMode(uint8_t newMode);
+    int init(int mode);
 
     void clear();
+    void refresh();
 
-    void setCursor(int16_t x, int16_t y);
+    void setCursor(int x, int y);
+    void lineFeed();
 
     int putChar(char ch);
 
 private:
-    void lineFeed();
+    void setupBuffer(int column, int row);
+    void scrollBuffer();
+    void drawChar(int x, int y, char ch);
 };
 
 #endif
